@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 1 starts with ordinary Python access to World Bank development indicators. There is no MCP server yet.
+Milestone 2 wraps the ordinary Python World Bank client in a tiny local tool-calling layer. There is still no MCP server yet.
 
-That is intentional. Before exposing a function as a tool, we want the function itself to be clear, typed, tested, and honest about where its data came from.
+That is intentional. Before MCP standardizes tool discovery and invocation, this project shows the underlying idea directly: a named capability, a description, an input schema, validation, execution, and a structured result.
 
 ## What Works Now
 
@@ -21,6 +21,8 @@ That is intentional. Before exposing a function as a tool, we want the function 
 - Retrieve indicator observations for one or more countries over a year range.
 - Normalize upstream API responses into typed dataclasses.
 - Attach provenance metadata to returned data.
+- List local tool definitions with names, descriptions, and input schemas.
+- Execute structured tool calls against the existing World Bank client.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -40,6 +42,14 @@ python examples/worldbank_smoke.py
 
 The example fetches Germany's World Bank country profile and recent GDP observations.
 
+To see the tool-calling concept before MCP:
+
+```bash
+python examples/tool_calling_demo.py
+```
+
+The demo contrasts a vague generic World Bank query tool with clearer domain-specific tools, then executes `get_country_profile` using structured arguments.
+
 ## Run Tests
 
 ```bash
@@ -57,13 +67,17 @@ RUN_LIVE_WORLD_BANK_TESTS=1 pytest tests/integration
 ```text
 src/trade_intel/
 ├── provenance.py
+├── tools/
+│   ├── registry.py
+│   ├── schemas.py
+│   └── worldbank_tools.py
 └── worldbank/
     ├── client.py
     ├── errors.py
     └── models.py
 ```
 
-The World Bank code is deliberately plain. Later milestones can wrap these functions with MCP, but the data access layer should not need to know that MCP exists.
+The World Bank code is deliberately plain. The tool layer wraps these functions without duplicating API logic. Later milestones can expose the same capabilities through MCP, but the data access layer should not need to know that MCP exists.
 
 ## Official References
 
@@ -77,12 +91,12 @@ The World Bank code is deliberately plain. Later milestones can wrap these funct
 ## Roadmap
 
 1. Ordinary Python access to World Bank data.
-2. Ordinary Python access to trade data.
-3. Turn useful functions into MCP tools.
-4. Add MCP resources for stable reference data.
-5. Split into semantic Trade and Economy MCP servers.
-6. Build a plain Python agent loop.
-7. Rebuild the same workflow with LangGraph and Google ADK for comparison.
+2. Wrap ordinary Python functions as local LLM-callable tools.
+3. Ordinary Python access to trade data.
+4. Turn useful functions into MCP tools.
+5. Add MCP resources for stable reference data.
+6. Split into semantic Trade and Economy MCP servers.
+7. Build a plain Python agent loop.
+8. Rebuild the same workflow with LangGraph and Google ADK for comparison.
 
 Each step should make the next abstraction feel necessary rather than decorative.
-

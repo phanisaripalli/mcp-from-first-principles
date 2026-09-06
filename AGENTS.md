@@ -34,18 +34,22 @@ Do not add these until a later milestone explicitly calls for them:
 - broad caching layers
 - complex orchestration
 
-## Milestone 1 Rule
+## Milestone Rules
 
 Milestone 1 is ordinary Python access to World Bank data. No MCP yet.
 
-Build:
+Milestone 2 is a minimal local tool-calling layer over the World Bank client. Still no MCP yet.
 
-- a small World Bank client
-- typed response models
-- provenance metadata
-- clear errors
-- unit tests
-- network-optional integration tests
+Build only what helps explain:
+
+- ordinary Python function vs LLM-callable tool
+- tool name and description
+- input schema
+- structured arguments
+- validation
+- tool execution
+- structured tool results
+- why tool descriptions matter for a probabilistic caller
 
 ## Documentation Style
 
@@ -65,4 +69,3 @@ Every data-bearing result should include enough information to inspect where it 
 ## Testing Expectations
 
 Use deterministic unit tests for parsing, validation, and calculations. Live API tests should be optional and easy to skip when network access is unavailable.
-
