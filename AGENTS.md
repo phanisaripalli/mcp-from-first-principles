@@ -46,6 +46,8 @@ Milestone 4 introduces MCP resources. Add resources only when the data is natura
 
 Milestone 5 introduces a second MCP server for Trade Intelligence. The Trade MCP server must not call the World Bank MCP server. Both servers should remain independent capabilities that happen to speak the same protocol.
 
+Milestone 6 introduces an OpenAI model as the caller. The model may choose a tool, but the host executes that choice through MCP. This is not a general autonomous agent loop.
+
 Build only what helps explain:
 
 - ordinary Python function vs LLM-callable tool
@@ -74,6 +76,16 @@ For Milestone 5, keep the architecture layered:
 - deterministic MCP client/demo
 
 MCP does not solve product classification, country-code mapping, missing data, revisions, or API limitations. Document those as ordinary software/data-engineering problems.
+
+For Milestone 6:
+
+- use the OpenAI Responses API only
+- read `OPENAI_API_KEY` and `OPENAI_MODEL` from the environment
+- do not print secrets
+- derive model tools from MCP discovery where practical
+- keep the MCP-to-OpenAI schema adapter small and explicit
+- support one model-selected tool-call round only
+- do not introduce LangGraph, Google ADK, memory, retries, or planning loops
 
 ## Documentation Style
 

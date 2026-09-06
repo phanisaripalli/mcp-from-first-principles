@@ -33,7 +33,11 @@ def test_mcp_server_exposes_tool_discovery_schema() -> None:
     result = run(scenario())
 
     tool_names = [tool.name for tool in result.tools]
-    assert tool_names == ["get_country_profile", "search_development_indicators"]
+    assert tool_names == [
+        "get_country_profile",
+        "search_development_indicators",
+        "get_development_indicator",
+    ]
     country_tool = result.tools[0]
     assert country_tool.title == "Get Country Profile"
     assert "World Bank metadata" in country_tool.description
@@ -122,6 +126,59 @@ def test_mcp_server_invokes_indicator_search() -> None:
     assert result.structured_content["indicators"][0]["provenance"]["source"] == (
         "World Bank Indicators API"
     )
+
+
+def test_mcp_server_invokes_development_indicator_lookup() -> None:
+    indicator_payload = [
+        {"page": 1, "pages": 1, "per_page": "50", "total": 1},
+        [
+            {
+                "id": "NY.GDP.MKTP.CD",
+                "name": "GDP (current US$)",
+                "unit": "",
+                "source": {"id": "2", "value": "World Development Indicators"},
+                "sourceNote": "GDP at purchaser's prices.",
+                "sourceOrganization": "World Bank national accounts data.",
+                "topics": [{"id": "3", "value": "Economy & Growth"}],
+            }
+        ],
+    ]
+    payloads = {
+        "/v2/indicator/NY.GDP.MKTP.CD?format=json": indicator_payload,
+        "/v2/country/deu/indicator/NY.GDP.MKTP.CD?format=json&date=2023%3A2023&per_page=20000": [
+            {"page": 1, "pages": 1, "per_page": "20000", "total": 1},
+            [
+                {
+                    "countryiso3code": "DEU",
+                    "country": {"id": "DE", "value": "Germany"},
+                    "date": "2023",
+                    "value": 4456081016096.69,
+                }
+            ],
+        ],
+    }
+
+    def client_factory():
+        return WorldBankClient(transport=make_transport(payloads))
+
+    async def scenario():
+        server = create_worldbank_mcp_server(client_factory)
+        async with Client(server, raise_exceptions=True) as client:
+            return await client.call_tool(
+                "get_development_indicator",
+                {
+                    "countries": ["DEU"],
+                    "indicator": "NY.GDP.MKTP.CD",
+                    "start_year": 2023,
+                    "end_year": 2023,
+                },
+            )
+
+    result = run(scenario())
+
+    assert result.is_error is False
+    assert result.structured_content["observations"][0]["country_code"] == "DEU"
+    assert result.structured_content["observations"][0]["indicator_code"] == "NY.GDP.MKTP.CD"
 
 
 def test_mcp_tool_error_is_returned_as_tool_result() -> None:

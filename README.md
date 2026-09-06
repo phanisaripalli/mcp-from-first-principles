@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 5 adds a second MCP server for trade intelligence.
+Milestone 6 introduces an OpenAI model as the tool-selecting caller.
 
-The new Trade MCP server is independent from the World Bank MCP server. It uses UN Comtrade public preview data to demonstrate product-code lookup and import-flow retrieval without introducing an LLM or cross-server orchestration.
+The model sees tools discovered from both independent MCP servers, chooses one tool from the available schemas, and the host executes that selection through MCP. This is still not a general agent framework.
 
 ## What Works Now
 
@@ -23,13 +23,15 @@ The new Trade MCP server is independent from the World Bank MCP server. It uses 
 - Attach provenance metadata to returned data.
 - List local tool definitions with names, descriptions, and input schemas.
 - Execute structured tool calls against the existing World Bank client.
-- Expose two World Bank capabilities through a thin MCP server.
+- Expose World Bank capabilities through a thin MCP server.
 - Test MCP tool discovery and invocation without an LLM.
 - Expose a small World Bank country profile resource through MCP.
 - Read `worldbank://countries/{country}` through a deterministic MCP client.
 - Search UN Comtrade HS product codes.
 - Retrieve a small normalized import-flow result from UN Comtrade public preview data.
 - Expose those trade capabilities through a second independent MCP server.
+- Let an OpenAI model choose one MCP-exposed tool for a natural-language question.
+- Print the selected tool, arguments, MCP result, and final answer.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -73,6 +75,20 @@ python examples/mcp_trade_demo.py DEU 2023 CHN
 
 The demo resolves lithium-ion batteries to an HS code, then queries Germany's imports from China for that product using UN Comtrade public preview data.
 
+To let an OpenAI model choose from both MCP servers:
+
+```bash
+python examples/llm_tool_caller_demo.py "What was Germany's nominal GDP in current US dollars in 2023?"
+```
+
+or:
+
+```bash
+python examples/llm_tool_caller_demo.py "How much did Germany import of lithium-ion batteries from China?"
+```
+
+This requires `OPENAI_API_KEY` and may incur OpenAI API cost. Set `OPENAI_MODEL` to choose the model; the default in `.env.example` is `gpt-5-nano`.
+
 To run the MCP server over stdio for an MCP-capable host:
 
 ```bash
@@ -99,6 +115,12 @@ To call the live UN Comtrade public preview API:
 RUN_LIVE_COMTRADE_TESTS=1 pytest tests/integration/test_comtrade_live.py
 ```
 
+To call the live OpenAI API, which may incur cost:
+
+```bash
+RUN_LIVE_OPENAI_TESTS=1 pytest tests/integration/test_openai_live.py
+```
+
 For more Comtrade usage, create a free key through the [UN Comtrade Developer Portal](https://comtradedeveloper.un.org/), subscribe to **Free APIs**, then find the key in your developer profile. A later milestone can support `COMTRADE_SUBSCRIPTION_KEY`; the current Trade demo does not require it.
 
 ## Project Structure
@@ -108,6 +130,10 @@ src/trade_intel/
 ├── mcp/
 │   ├── trade_server.py
 │   └── worldbank_server.py
+├── llm/
+│   ├── openai_host.py
+│   ├── routing.py
+│   └── tool_adapter.py
 ├── provenance.py
 ├── trade/
 │   ├── client.py
@@ -145,9 +171,10 @@ The World Bank and Trade code are deliberately plain. MCP servers wrap those dom
 3. Expose selected tools through MCP.
 4. Add a small MCP resource for addressable World Bank context.
 5. Add a second independent MCP server for trade data.
-6. Add MCP resources for stable trade reference data.
-7. Compose Trade and Economy capabilities from a host.
-8. Build a plain Python agent loop.
-9. Rebuild the same workflow with LangGraph and Google ADK for comparison.
+6. Let an LLM choose one MCP-exposed tool.
+7. Add MCP resources for stable trade reference data.
+8. Compose Trade and Economy capabilities from a host.
+9. Build a plain Python agent loop.
+10. Rebuild the same workflow with LangGraph and Google ADK for comparison.
 
 Each step should make the next abstraction feel necessary rather than decorative.

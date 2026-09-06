@@ -114,5 +114,5 @@ def test_existing_mcp_tools_still_work_after_adding_resources() -> None:
     assert [tool.name for tool in result.tools] == [
         "get_country_profile",
         "search_development_indicators",
+        "get_development_indicator",
     ]
-

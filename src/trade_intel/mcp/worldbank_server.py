@@ -80,6 +80,36 @@ def create_worldbank_mcp_server(
             raise ToolError(str(exc)) from exc
         return {"indicators": to_jsonable(indicators)}
 
+    @server.tool(
+        name="get_development_indicator",
+        title="Get Development Indicator",
+        description=(
+            "Fetch World Bank development indicator observations for one or more "
+            "countries over a year range. Use ISO3 country codes such as DEU and "
+            "a World Bank indicator code such as NY.GDP.MKTP.CD for nominal GDP."
+        ),
+        structured_output=True,
+    )
+    async def get_development_indicator(
+        countries: list[str],
+        indicator: str,
+        start_year: int,
+        end_year: int,
+    ) -> dict[str, Any]:
+        if start_year > end_year:
+            raise ToolError("start_year must be less than or equal to end_year")
+        try:
+            async with make_client() as client:
+                observations = await client.get_indicator(
+                    countries,
+                    indicator,
+                    start_year,
+                    end_year,
+                )
+        except WorldBankError as exc:
+            raise ToolError(str(exc)) from exc
+        return {"observations": to_jsonable(observations)}
+
     @server.resource(
         "worldbank://countries/DEU",
         name="worldbank_country_deu",
