@@ -26,7 +26,7 @@ The goal is not to hide simple ideas behind buzzwords. The goal is to show why e
 Do not add these until a later milestone explicitly calls for them:
 
 - MCP server code
-- LangGraph
+- additional LangGraph features beyond the current comparison graph
 - Google ADK
 - database storage
 - Docker
@@ -49,6 +49,8 @@ Milestone 5 introduces a second MCP server for Trade Intelligence. The Trade MCP
 Milestone 6 introduces an OpenAI model as the caller. The model may choose a tool, but the host executes that choice through MCP. This is not a general autonomous agent loop.
 
 Milestone 7 introduces a bounded plain-Python agent loop. The loop is the new concept: reason, act, observe, reason again. MCP servers should remain unchanged.
+
+Milestone 8 rebuilds the same agent loop with LangGraph. Keep this as a second implementation for comparison. Do not replace the plain-Python loop.
 
 Build only what helps explain:
 
@@ -96,6 +98,15 @@ For Milestone 7:
 - record model decisions, MCP routes, arguments, observations, and final answer
 - do not build a generic framework
 - do not add memory, vector search, retries, planner/executor splits, or multi-agent behavior
+
+For Milestone 8:
+
+- keep LangGraph code in the orchestration layer
+- reuse the existing MCP discovery and routing layer
+- do not move MCP or domain logic into LangGraph nodes
+- keep the graph small: model, tools, synthesize, and conditional routing
+- explain state, nodes, edges, and termination plainly
+- do not add persistence, checkpoints, memory, human-in-the-loop, or advanced LangGraph features yet
 
 ## Documentation Style
 

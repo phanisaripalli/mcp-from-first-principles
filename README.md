@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 7 introduces a plain Python agent loop.
+Milestone 8 rebuilds the plain Python agent loop with LangGraph.
 
-The model can now choose a tool, observe the result, and decide whether to call another tool or produce a final answer. The loop is owned by the host/application, not MCP.
+The plain Python loop remains in place. LangGraph now provides a second implementation of the same model -> tool -> observation -> model cycle so the two orchestration styles can be compared side by side.
 
 ## What Works Now
 
@@ -34,6 +34,8 @@ The model can now choose a tool, observe the result, and decide whether to call 
 - Print the selected tool, arguments, MCP result, and final answer.
 - Run a bounded plain-Python agent loop over both MCP servers.
 - Print each model decision and MCP observation in the loop.
+- Run the same loop through a small LangGraph state graph.
+- Compare ordinary loop variables with explicit graph state, nodes, edges, and conditional routing.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -99,6 +101,14 @@ python examples/agent_loop_demo.py
 
 The default question asks about Germany's lithium-ion battery imports from China and compares that trade value with Germany's GDP. The demo prints each selected MCP tool, its arguments, each observation, and the final answer.
 
+To run the same loop represented as a LangGraph graph:
+
+```bash
+python examples/langgraph_agent_demo.py
+```
+
+This uses the same MCP servers, OpenAI model configuration, and default question as the plain Python demo.
+
 To run the MCP server over stdio for an MCP-capable host:
 
 ```bash
@@ -137,6 +147,12 @@ To call the live OpenAI API through the bounded agent loop:
 RUN_LIVE_OPENAI_AGENT_TESTS=1 pytest tests/integration/test_openai_agent_live.py
 ```
 
+To call the live OpenAI API through the LangGraph version:
+
+```bash
+RUN_LIVE_LANGGRAPH_AGENT_TESTS=1 pytest tests/integration/test_langgraph_agent_live.py
+```
+
 For more Comtrade usage, create a free key through the [UN Comtrade Developer Portal](https://comtradedeveloper.un.org/), subscribe to **Free APIs**, then find the key in your developer profile. A later milestone can support `COMTRADE_SUBSCRIPTION_KEY`; the current Trade demo does not require it.
 
 ## Project Structure
@@ -148,6 +164,7 @@ src/trade_intel/
 │   └── worldbank_server.py
 ├── llm/
 │   ├── agent_loop.py
+│   ├── langgraph_agent.py
 │   ├── openai_host.py
 │   ├── routing.py
 │   └── tool_adapter.py
@@ -180,6 +197,7 @@ The World Bank and Trade code are deliberately plain. MCP servers wrap those dom
 - [UN Comtrade API documentation](https://uncomtrade.org/docs/un-comtrade-api/)
 - [UN Comtrade API subscription keys](https://uncomtrade.org/docs/api-subscription-keys/)
 - [UN Comtrade country codes](https://uncomtrade.org/docs/country-codes/)
+- [LangGraph documentation](https://docs.langchain.com/oss/python/langgraph/overview)
 
 ## Roadmap
 
@@ -190,8 +208,9 @@ The World Bank and Trade code are deliberately plain. MCP servers wrap those dom
 5. Add a second independent MCP server for trade data.
 6. Let an LLM choose one MCP-exposed tool.
 7. Build a bounded plain-Python agent loop.
-8. Add MCP resources for stable trade reference data.
-9. Compose Trade and Economy capabilities from a host.
-10. Rebuild the same workflow with LangGraph and Google ADK for comparison.
+8. Rebuild the agent loop with LangGraph for comparison.
+9. Add MCP resources for stable trade reference data.
+10. Compose Trade and Economy capabilities from a host.
+11. Rebuild the same workflow with Google ADK for comparison.
 
 Each step should make the next abstraction feel necessary rather than decorative.
