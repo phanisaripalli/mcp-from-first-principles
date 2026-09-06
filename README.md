@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 6 introduces an OpenAI model as the tool-selecting caller.
+Milestone 7 introduces a plain Python agent loop.
 
-The model sees tools discovered from both independent MCP servers, chooses one tool from the available schemas, and the host executes that selection through MCP. This is still not a general agent framework.
+The model can now choose a tool, observe the result, and decide whether to call another tool or produce a final answer. The loop is owned by the host/application, not MCP.
 
 ## What Works Now
 
@@ -32,6 +32,8 @@ The model sees tools discovered from both independent MCP servers, chooses one t
 - Expose those trade capabilities through a second independent MCP server.
 - Let an OpenAI model choose one MCP-exposed tool for a natural-language question.
 - Print the selected tool, arguments, MCP result, and final answer.
+- Run a bounded plain-Python agent loop over both MCP servers.
+- Print each model decision and MCP observation in the loop.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -89,6 +91,14 @@ python examples/llm_tool_caller_demo.py "How much did Germany import of lithium-
 
 This requires `OPENAI_API_KEY` and may incur OpenAI API cost. Set `OPENAI_MODEL` to choose the model; the default in `.env.example` is `gpt-5-nano`.
 
+To run the first plain-Python agent loop:
+
+```bash
+python examples/agent_loop_demo.py
+```
+
+The default question asks about Germany's lithium-ion battery imports from China and compares that trade value with Germany's GDP. The demo prints each selected MCP tool, its arguments, each observation, and the final answer.
+
 To run the MCP server over stdio for an MCP-capable host:
 
 ```bash
@@ -121,6 +131,12 @@ To call the live OpenAI API, which may incur cost:
 RUN_LIVE_OPENAI_TESTS=1 pytest tests/integration/test_openai_live.py
 ```
 
+To call the live OpenAI API through the bounded agent loop:
+
+```bash
+RUN_LIVE_OPENAI_AGENT_TESTS=1 pytest tests/integration/test_openai_agent_live.py
+```
+
 For more Comtrade usage, create a free key through the [UN Comtrade Developer Portal](https://comtradedeveloper.un.org/), subscribe to **Free APIs**, then find the key in your developer profile. A later milestone can support `COMTRADE_SUBSCRIPTION_KEY`; the current Trade demo does not require it.
 
 ## Project Structure
@@ -131,6 +147,7 @@ src/trade_intel/
 │   ├── trade_server.py
 │   └── worldbank_server.py
 ├── llm/
+│   ├── agent_loop.py
 │   ├── openai_host.py
 │   ├── routing.py
 │   └── tool_adapter.py
@@ -172,9 +189,9 @@ The World Bank and Trade code are deliberately plain. MCP servers wrap those dom
 4. Add a small MCP resource for addressable World Bank context.
 5. Add a second independent MCP server for trade data.
 6. Let an LLM choose one MCP-exposed tool.
-7. Add MCP resources for stable trade reference data.
-8. Compose Trade and Economy capabilities from a host.
-9. Build a plain Python agent loop.
+7. Build a bounded plain-Python agent loop.
+8. Add MCP resources for stable trade reference data.
+9. Compose Trade and Economy capabilities from a host.
 10. Rebuild the same workflow with LangGraph and Google ADK for comparison.
 
 Each step should make the next abstraction feel necessary rather than decorative.

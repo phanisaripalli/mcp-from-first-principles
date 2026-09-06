@@ -48,6 +48,8 @@ Milestone 5 introduces a second MCP server for Trade Intelligence. The Trade MCP
 
 Milestone 6 introduces an OpenAI model as the caller. The model may choose a tool, but the host executes that choice through MCP. This is not a general autonomous agent loop.
 
+Milestone 7 introduces a bounded plain-Python agent loop. The loop is the new concept: reason, act, observe, reason again. MCP servers should remain unchanged.
+
 Build only what helps explain:
 
 - ordinary Python function vs LLM-callable tool
@@ -86,6 +88,14 @@ For Milestone 6:
 - keep the MCP-to-OpenAI schema adapter small and explicit
 - support one model-selected tool-call round only
 - do not introduce LangGraph, Google ADK, memory, retries, or planning loops
+
+For Milestone 7:
+
+- keep the loop explicit and readable
+- use `max_iterations` and `max_tool_calls_per_iteration`
+- record model decisions, MCP routes, arguments, observations, and final answer
+- do not build a generic framework
+- do not add memory, vector search, retries, planner/executor splits, or multi-agent behavior
 
 ## Documentation Style
 

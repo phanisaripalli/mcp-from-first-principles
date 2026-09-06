@@ -208,6 +208,13 @@ def _parse_indicator_summary(row: dict[str, Any], provenance: Provenance) -> Ind
     topics = row.get("topics") or []
     if not isinstance(topics, list):
         raise WorldBankResponseError("Expected indicator topics to be a list")
+    topic_names: list[str] = []
+    for topic in topics:
+        if not isinstance(topic, dict):
+            raise WorldBankResponseError("Expected indicator topic to be an object")
+        topic_name = _optional_str(topic.get("value"))
+        if topic_name is not None:
+            topic_names.append(topic_name)
     return IndicatorSummary(
         code=_required_str(row, "id"),
         name=_required_str(row, "name"),
@@ -216,7 +223,7 @@ def _parse_indicator_summary(row: dict[str, Any], provenance: Provenance) -> Ind
         source_name=_required_str(source, "value"),
         source_note=_optional_str(row.get("sourceNote")),
         source_organization=_optional_str(row.get("sourceOrganization")),
-        topics=tuple(_required_str(topic, "value") for topic in topics),
+        topics=tuple(topic_names),
         provenance=provenance,
     )
 
@@ -310,4 +317,3 @@ def _optional_float(value: Any) -> float | None:
     if value in (None, ""):
         return None
     return float(value)
-

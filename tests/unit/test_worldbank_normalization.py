@@ -144,6 +144,36 @@ def test_search_indicators_matches_name_code_and_source_note() -> None:
     assert matches[0].topics == ("Economy & Growth",)
 
 
+def test_search_indicators_ignores_empty_topic_labels() -> None:
+    payloads = {
+        "/v2/indicator?format=json&per_page=100&page=1": [
+            {"page": 1, "pages": 1, "per_page": "100", "total": 1},
+            [
+                {
+                    "id": "NY.GDP.MKTP.CD",
+                    "name": "GDP (current US$)",
+                    "unit": "",
+                    "source": {"id": "2", "value": "World Development Indicators"},
+                    "sourceNote": "GDP at purchaser's prices.",
+                    "sourceOrganization": "World Bank.",
+                    "topics": [
+                        {"id": "3", "value": "Economy & Growth"},
+                        {"id": "", "value": ""},
+                    ],
+                },
+            ],
+        ]
+    }
+
+    async def scenario():
+        async with WorldBankClient(transport=make_transport(payloads)) as client:
+            return await client.search_indicators("gdp")
+
+    matches = run(scenario())
+
+    assert matches[0].topics == ("Economy & Growth",)
+
+
 def test_worldbank_api_error_is_raised() -> None:
     payloads = {
         "/v2/country/not-a-code?format=json": {
@@ -188,4 +218,3 @@ def test_empty_indicator_observations_raise_not_found() -> None:
 
     with pytest.raises(WorldBankNotFoundError):
         run(scenario())
-
