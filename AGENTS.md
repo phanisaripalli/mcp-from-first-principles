@@ -44,6 +44,8 @@ Milestone 3 introduces MCP for the first time. The MCP server must be a thin ada
 
 Milestone 4 introduces MCP resources. Add resources only when the data is naturally addressable context. Do not create resources merely because MCP supports them.
 
+Milestone 5 introduces a second MCP server for Trade Intelligence. The Trade MCP server must not call the World Bank MCP server. Both servers should remain independent capabilities that happen to speak the same protocol.
+
 Build only what helps explain:
 
 - ordinary Python function vs LLM-callable tool
@@ -63,6 +65,15 @@ For Milestone 4, keep tools and resources conceptually distinct:
 - resources let the client read addressable context
 
 It is acceptable for a tool and a resource to reuse the same domain function.
+
+For Milestone 5, keep the architecture layered:
+
+- Trade API
+- typed Trade client/domain functions
+- Trade MCP server
+- deterministic MCP client/demo
+
+MCP does not solve product classification, country-code mapping, missing data, revisions, or API limitations. Document those as ordinary software/data-engineering problems.
 
 ## Documentation Style
 
