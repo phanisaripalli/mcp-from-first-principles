@@ -38,6 +38,47 @@ async def main(country: str = "DEU") -> None:
             )
         )
 
+        resources = await client.list_resources()
+        print("\nMCP resource discovery:")
+        print(
+            json.dumps(
+                [
+                    {
+                        "uri": str(resource.uri),
+                        "name": resource.name,
+                        "title": resource.title,
+                        "description": resource.description,
+                        "mime_type": resource.mime_type,
+                    }
+                    for resource in resources.resources
+                ],
+                indent=2,
+            )
+        )
+
+        templates = await client.list_resource_templates()
+        print("\nMCP resource template discovery:")
+        print(
+            json.dumps(
+                [
+                    {
+                        "uri_template": template.uri_template,
+                        "name": template.name,
+                        "title": template.title,
+                        "description": template.description,
+                        "mime_type": template.mime_type,
+                    }
+                    for template in templates.resource_templates
+                ],
+                indent=2,
+            )
+        )
+
+        resource_uri = f"worldbank://countries/{country}"
+        resource = await client.read_resource(resource_uri)
+        print(f"\nMCP resource read: {resource_uri}")
+        print(resource.contents[0].text)
+
         result = await client.call_tool("get_country_profile", {"country": country})
         print("\nMCP tool invocation:")
         print(

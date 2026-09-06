@@ -42,6 +42,8 @@ Milestone 2 is a minimal local tool-calling layer over the World Bank client. St
 
 Milestone 3 introduces MCP for the first time. The MCP server must be a thin adapter over existing capabilities.
 
+Milestone 4 introduces MCP resources. Add resources only when the data is naturally addressable context. Do not create resources merely because MCP supports them.
+
 Build only what helps explain:
 
 - ordinary Python function vs LLM-callable tool
@@ -54,6 +56,13 @@ Build only what helps explain:
 - why tool descriptions matter for a probabilistic caller
 
 For Milestone 3, do not move World Bank API/domain logic into the MCP server. The MCP layer exists to demonstrate standardized discovery and invocation across a protocol boundary.
+
+For Milestone 4, keep tools and resources conceptually distinct:
+
+- tools ask the server to perform a capability
+- resources let the client read addressable context
+
+It is acceptable for a tool and a resource to reuse the same domain function.
 
 ## Documentation Style
 

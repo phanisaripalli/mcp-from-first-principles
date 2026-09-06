@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 3 exposes a small subset of the existing World Bank capabilities through MCP for the first time.
+Milestone 4 adds MCP resources to the existing World Bank MCP server.
 
-Milestone 2 showed application-specific tool calling. Milestone 3 shows the interoperability step: a host/client can discover and invoke tools through a standard MCP protocol boundary.
+Milestone 3 showed MCP tool discovery and invocation. Milestone 4 adds addressable context: a client can list and read resources such as `worldbank://countries/DEU`.
 
 ## What Works Now
 
@@ -25,6 +25,8 @@ Milestone 2 showed application-specific tool calling. Milestone 3 shows the inte
 - Execute structured tool calls against the existing World Bank client.
 - Expose two World Bank capabilities through a thin MCP server.
 - Test MCP tool discovery and invocation without an LLM.
+- Expose a small World Bank country profile resource through MCP.
+- Read `worldbank://countries/{country}` through a deterministic MCP client.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -52,11 +54,13 @@ python examples/tool_calling_demo.py
 
 The demo contrasts a vague generic World Bank query tool with clearer domain-specific tools, then executes `get_country_profile` using structured arguments.
 
-To see MCP discovery and invocation without an LLM:
+To see MCP tool and resource discovery without an LLM:
 
 ```bash
 python examples/mcp_worldbank_demo.py IND
 ```
+
+That demo shows tool discovery, resource discovery, resource-template discovery, resource reading, and tool invocation.
 
 To run the MCP server over stdio for an MCP-capable host:
 
@@ -111,10 +115,11 @@ The World Bank code is deliberately plain. The local tool layer and MCP server b
 1. Ordinary Python access to World Bank data.
 2. Wrap ordinary Python functions as local LLM-callable tools.
 3. Expose selected tools through MCP.
-4. Ordinary Python access to trade data.
-5. Add MCP resources for stable reference data.
-6. Split into semantic Trade and Economy MCP servers.
-7. Build a plain Python agent loop.
-8. Rebuild the same workflow with LangGraph and Google ADK for comparison.
+4. Add a small MCP resource for addressable World Bank context.
+5. Ordinary Python access to trade data.
+6. Add MCP resources for stable trade reference data.
+7. Split into semantic Trade and Economy MCP servers.
+8. Build a plain Python agent loop.
+9. Rebuild the same workflow with LangGraph and Google ADK for comparison.
 
 Each step should make the next abstraction feel necessary rather than decorative.

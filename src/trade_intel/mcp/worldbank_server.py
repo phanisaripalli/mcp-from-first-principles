@@ -4,7 +4,7 @@ from contextlib import AbstractAsyncContextManager
 from typing import Any, Callable
 
 from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.mcpserver.exceptions import ResourceError, ToolError
 
 from trade_intel.serialization import to_jsonable
 from trade_intel.worldbank import WorldBankClient
@@ -27,6 +27,22 @@ def create_worldbank_mcp_server(
         ),
     )
 
+    async def get_country_profile_data(country: str) -> dict[str, Any]:
+        async with make_client() as client:
+            return to_jsonable(await client.get_country_profile(country))
+
+    async def read_country_profile_tool(country: str) -> dict[str, Any]:
+        try:
+            return await get_country_profile_data(country)
+        except WorldBankError as exc:
+            raise ToolError(str(exc)) from exc
+
+    async def read_country_profile_resource(country: str) -> dict[str, Any]:
+        try:
+            return await get_country_profile_data(country)
+        except WorldBankError as exc:
+            raise ResourceError(str(exc)) from exc
+
     @server.tool(
         name="get_country_profile",
         title="Get Country Profile",
@@ -39,11 +55,7 @@ def create_worldbank_mcp_server(
         structured_output=True,
     )
     async def get_country_profile(country: str) -> dict[str, Any]:
-        try:
-            async with make_client() as client:
-                return to_jsonable(await client.get_country_profile(country))
-        except WorldBankError as exc:
-            raise ToolError(str(exc)) from exc
+        return await read_country_profile_tool(country)
 
     @server.tool(
         name="search_development_indicators",
@@ -67,6 +79,33 @@ def create_worldbank_mcp_server(
         except WorldBankError as exc:
             raise ToolError(str(exc)) from exc
         return {"indicators": to_jsonable(indicators)}
+
+    @server.resource(
+        "worldbank://countries/DEU",
+        name="worldbank_country_deu",
+        title="World Bank Country Profile: Germany",
+        description=(
+            "Concrete example of an addressable World Bank country profile "
+            "resource. Read it for normalized Germany metadata and provenance."
+        ),
+        mime_type="application/json",
+    )
+    async def germany_country_profile() -> dict[str, Any]:
+        return await read_country_profile_resource("DEU")
+
+    @server.resource(
+        "worldbank://countries/{country}",
+        name="worldbank_country_profile",
+        title="World Bank Country Profile",
+        description=(
+            "Read a normalized World Bank country profile by URI, for example "
+            "worldbank://countries/IND. This is addressable reference context, "
+            "not a search capability."
+        ),
+        mime_type="application/json",
+    )
+    async def country_profile_resource(country: str) -> dict[str, Any]:
+        return await read_country_profile_resource(country)
 
     return server
 
