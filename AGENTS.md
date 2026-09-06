@@ -40,6 +40,8 @@ Milestone 1 is ordinary Python access to World Bank data. No MCP yet.
 
 Milestone 2 is a minimal local tool-calling layer over the World Bank client. Still no MCP yet.
 
+Milestone 3 introduces MCP for the first time. The MCP server must be a thin adapter over existing capabilities.
+
 Build only what helps explain:
 
 - ordinary Python function vs LLM-callable tool
@@ -50,6 +52,8 @@ Build only what helps explain:
 - tool execution
 - structured tool results
 - why tool descriptions matter for a probabilistic caller
+
+For Milestone 3, do not move World Bank API/domain logic into the MCP server. The MCP layer exists to demonstrate standardized discovery and invocation across a protocol boundary.
 
 ## Documentation Style
 

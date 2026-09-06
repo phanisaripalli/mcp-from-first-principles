@@ -10,9 +10,9 @@ The goal is not to build another toy weather server. It is to show where MCP hel
 
 ## Current Milestone
 
-Milestone 2 wraps the ordinary Python World Bank client in a tiny local tool-calling layer. There is still no MCP server yet.
+Milestone 3 exposes a small subset of the existing World Bank capabilities through MCP for the first time.
 
-That is intentional. Before MCP standardizes tool discovery and invocation, this project shows the underlying idea directly: a named capability, a description, an input schema, validation, execution, and a structured result.
+Milestone 2 showed application-specific tool calling. Milestone 3 shows the interoperability step: a host/client can discover and invoke tools through a standard MCP protocol boundary.
 
 ## What Works Now
 
@@ -23,6 +23,8 @@ That is intentional. Before MCP standardizes tool discovery and invocation, this
 - Attach provenance metadata to returned data.
 - List local tool definitions with names, descriptions, and input schemas.
 - Execute structured tool calls against the existing World Bank client.
+- Expose two World Bank capabilities through a thin MCP server.
+- Test MCP tool discovery and invocation without an LLM.
 - Run unit tests without network access.
 - Optionally run a live World Bank integration test.
 
@@ -50,6 +52,20 @@ python examples/tool_calling_demo.py
 
 The demo contrasts a vague generic World Bank query tool with clearer domain-specific tools, then executes `get_country_profile` using structured arguments.
 
+To see MCP discovery and invocation without an LLM:
+
+```bash
+python examples/mcp_worldbank_demo.py IND
+```
+
+To run the MCP server over stdio for an MCP-capable host:
+
+```bash
+python -m trade_intel.mcp.worldbank_server
+```
+
+That command waits for an MCP client to speak over standard input/output, so it will appear to hang if you run it directly in a normal terminal.
+
 ## Run Tests
 
 ```bash
@@ -66,6 +82,8 @@ RUN_LIVE_WORLD_BANK_TESTS=1 pytest tests/integration
 
 ```text
 src/trade_intel/
+├── mcp/
+│   └── worldbank_server.py
 ├── provenance.py
 ├── tools/
 │   ├── registry.py
@@ -77,7 +95,7 @@ src/trade_intel/
     └── models.py
 ```
 
-The World Bank code is deliberately plain. The tool layer wraps these functions without duplicating API logic. Later milestones can expose the same capabilities through MCP, but the data access layer should not need to know that MCP exists.
+The World Bank code is deliberately plain. The local tool layer and MCP server both wrap these functions without duplicating API logic. The data access layer does not need to know that MCP exists.
 
 ## Official References
 
@@ -92,8 +110,8 @@ The World Bank code is deliberately plain. The tool layer wraps these functions 
 
 1. Ordinary Python access to World Bank data.
 2. Wrap ordinary Python functions as local LLM-callable tools.
-3. Ordinary Python access to trade data.
-4. Turn useful functions into MCP tools.
+3. Expose selected tools through MCP.
+4. Ordinary Python access to trade data.
 5. Add MCP resources for stable reference data.
 6. Split into semantic Trade and Economy MCP servers.
 7. Build a plain Python agent loop.

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any
 
+from trade_intel.serialization import to_jsonable
 from trade_intel.tools.schemas import InputSchema
 
 
@@ -76,18 +77,4 @@ class ToolRegistry:
             content = await tool.executor(validated)
         except Exception as exc:
             return ToolResult(tool_name=name, ok=False, error=str(exc))
-        return ToolResult(tool_name=name, ok=True, content=_to_structured_content(content))
-
-
-def _to_structured_content(value: Any) -> Any:
-    if isinstance(value, list):
-        return [_to_structured_content(item) for item in value]
-    if isinstance(value, tuple):
-        return [_to_structured_content(item) for item in value]
-    if hasattr(value, "__dataclass_fields__"):
-        return {
-            key: _to_structured_content(item)
-            for key, item in asdict(value).items()
-        }
-    return value
-
+        return ToolResult(tool_name=name, ok=True, content=to_jsonable(content))
